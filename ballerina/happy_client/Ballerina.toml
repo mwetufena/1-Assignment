@@ -1,0 +1,11 @@
+[package]
+org = "mwetufena"
+name = "rental_accommodation_client"
+version = "1.0.0"
+distribution = "2201.8.0"
+
+[dependencies]
+"ballerina/grpc" = "0.0.0"
+
+[build-options]
+observabilityIncluded = true

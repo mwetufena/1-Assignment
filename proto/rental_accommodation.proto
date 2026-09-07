@@ -1,0 +1,275 @@
+// ============================================================================
+// Rental Accommodation System - gRPC Service Definition
+// Ministry of Tourism - Short-term Accommodation Rental Platform
+// ============================================================================
+// This proto file defines the complete gRPC contract for the distributed
+// rental accommodation system, supporting Host and Guest roles with
+// Simple RPC, Client-side Streaming, and Server-side Streaming patterns.
+// ============================================================================
+
+syntax = "proto3";
+
+package rental.accommodation;
+
+// ============================================================================
+// SERVICE DEFINITION
+// ============================================================================
+
+service RentalAccommodationService {
+
+  // --- SIMPLE RPC: Host registers a new accommodation listing ---
+  // Returns a unique property_id upon successful registration
+  rpc add_property(AddPropertyRequest) returns (AddPropertyResponse);
+
+  // --- CLIENT-SIDE STREAMING: Create multiple user profiles ---
+  // Client streams individual user records; server responds with a single
+  // confirmation containing all assigned user IDs
+  rpc create_users(stream CreateUserRequest) returns (CreateUsersResponse);
+
+  // --- SIMPLE RPC: Host updates listing details ---
+  // Uses property_id as the unique key; supports partial updates
+  rpc update_property(UpdatePropertyRequest) returns (UpdatePropertyResponse);
+
+  // --- SIMPLE RPC: Host deletes a listing ---
+  // Returns the updated full list of available properties in the Host's region
+  rpc remove_property(RemovePropertyRequest) returns (RemovePropertyResponse);
+
+  // --- SERVER-SIDE STREAMING: Guest requests available properties ---
+  // Server streams back property details one by one; supports optional
+  // filtering by location, price range, property type, and max guests
+  rpc list_available_properties(ListPropertiesRequest) returns (stream PropertyDetails);
+
+  // --- SIMPLE RPC: Guest looks up a specific property ---
+  // Returns full details if available; otherwise returns "Not Available" status
+  rpc search_property(SearchPropertyRequest) returns (SearchPropertyResponse);
+
+  // --- SIMPLE RPC: Guest books a property (adds to temporary cart) ---
+  // Validates dates (end > start) and adds to booking cart
+  rpc book_property(BookPropertyRequest) returns (BookPropertyResponse);
+
+  // --- SIMPLE RPC: Finalizes the booking from the cart ---
+  // Verifies no date overlaps, calculates total cost, returns confirmation
+  rpc confirm_booking(ConfirmBookingRequest) returns (ConfirmBookingResponse);
+}
+
+// ============================================================================
+// ENUMERATIONS
+// ============================================================================
+
+enum UserRole {
+  HOST = 0;
+  GUEST = 1;
+}
+
+enum PropertyType {
+  APARTMENT = 0;
+  HOUSE = 1;
+  VILLA = 2;
+  CABIN = 3;
+  COTTAGE = 4;
+  STUDIO = 5;
+}
+
+enum PropertyStatus {
+  AVAILABLE = 0;
+  UNAVAILABLE = 1;
+  MAINTENANCE = 2;
+}
+
+enum BookingStatus {
+  PENDING = 0;
+  CONFIRMED = 1;
+  CANCELLED = 2;
+  COMPLETED = 3;
+}
+
+// ============================================================================
+// MESSAGE DEFINITIONS - Add Property
+// ============================================================================
+
+message AddPropertyRequest {
+  string host_id = 1;
+  string property_name = 2;
+  string location = 3;
+  PropertyType property_type = 4;
+  double price_per_night = 5;
+  PropertyStatus status = 6;
+  string description = 7;
+  int32 max_guests = 8;
+  repeated string amenities = 9;
+  string image_url = 10;
+}
+
+message AddPropertyResponse {
+  string property_id = 1;
+  string message = 2;
+  int64 timestamp = 3;
+}
+
+// ============================================================================
+// MESSAGE DEFINITIONS - Create Users (Client Streaming)
+// ============================================================================
+
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+  UserRole role = 3;
+  string phone = 4;
+  string address = 5;
+}
+
+message CreateUsersResponse {
+  repeated UserInfo created_users = 1;
+  int32 total_count = 2;
+  string message = 3;
+}
+
+message UserInfo {
+  string user_id = 1;
+  string name = 2;
+  string email = 3;
+  UserRole role = 4;
+  string phone = 5;
+  int64 created_at = 6;
+}
+
+// ============================================================================
+// MESSAGE DEFINITIONS - Update Property
+// ============================================================================
+
+message UpdatePropertyRequest {
+  string property_id = 1;
+  string host_id = 2;
+  optional string property_name = 3;
+  optional string location = 4;
+  optional PropertyType property_type = 5;
+  optional double price_per_night = 6;
+  optional PropertyStatus status = 7;
+  optional string description = 8;
+  optional int32 max_guests = 9;
+  optional string image_url = 10;
+}
+
+message UpdatePropertyResponse {
+  bool success = 1;
+  string message = 2;
+  PropertyDetails property = 3;
+}
+
+// ============================================================================
+// MESSAGE DEFINITIONS - Remove Property
+// ============================================================================
+
+message RemovePropertyRequest {
+  string property_id = 1;
+  string host_id = 2;
+}
+
+message RemovePropertyResponse {
+  bool success = 1;
+  string message = 2;
+  repeated PropertyDetails remaining_properties = 3;
+}
+
+// ============================================================================
+// MESSAGE DEFINITIONS - List Available Properties (Server Streaming)
+// ============================================================================
+
+message ListPropertiesRequest {
+  optional string location = 1;
+  optional double min_price = 2;
+  optional double max_price = 3;
+  optional PropertyType property_type = 4;
+  optional int32 max_guests = 5;
+  string guest_id = 6;  // For personalization/tracking
+}
+
+message PropertyDetails {
+  string property_id = 1;
+  string host_id = 2;
+  string property_name = 3;
+  string location = 4;
+  PropertyType property_type = 5;
+  double price_per_night = 6;
+  PropertyStatus status = 7;
+  string description = 8;
+  int32 max_guests = 9;
+  repeated string amenities = 10;
+  double average_rating = 11;
+  int32 total_reviews = 12;
+  string image_url = 13;
+  int64 created_at = 14;
+}
+
+// ============================================================================
+// MESSAGE DEFINITIONS - Search Property
+// ============================================================================
+
+message SearchPropertyRequest {
+  string property_id = 1;
+}
+
+message SearchPropertyResponse {
+  bool available = 1;
+  string message = 2;
+  PropertyDetails property = 3;
+}
+
+// ============================================================================
+// MESSAGE DEFINITIONS - Book Property
+// ============================================================================
+
+message BookPropertyRequest {
+  string guest_id = 1;
+  string property_id = 2;
+  string check_in_date = 3;    // ISO 8601 format: YYYY-MM-DD
+  string check_out_date = 4;   // ISO 8601 format: YYYY-MM-DD
+  int32 number_of_guests = 5;
+}
+
+message BookPropertyResponse {
+  string cart_id = 1;
+  string message = 2;
+  bool success = 3;
+  double estimated_cost = 4;
+}
+
+// ============================================================================
+// MESSAGE DEFINITIONS - Confirm Booking
+// ============================================================================
+
+message ConfirmBookingRequest {
+  string cart_id = 1;
+  string guest_id = 2;
+}
+
+message ConfirmBookingResponse {
+  bool success = 1;
+  string booking_id = 2;
+  string property_id = 3;
+  string property_name = 4;
+  string check_in_date = 5;
+  string check_out_date = 6;
+  int32 number_of_nights = 7;
+  double price_per_night = 8;
+  double total_cost = 9;
+  string message = 10;
+  int64 confirmed_at = 11;
+}
+
+// ============================================================================
+// MESSAGE DEFINITIONS - Shared/Utility
+// ============================================================================
+
+message Empty {}
+
+message DateRange {
+  string start_date = 1;
+  string end_date = 2;
+}
+
+message ErrorResponse {
+  int32 code = 1;
+  string message = 2;
+  string details = 3;
+}

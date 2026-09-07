@@ -1,0 +1,35 @@
+
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Build output and caches
+dist/
+build/
+coverage/
+.cache/
+.turbo/
+.vercel/
+
+
+# ESLint
+.eslintcache
+eslint-cache/
+
+# Ballerina
+target/
+.ballerina/
+*.bala
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
