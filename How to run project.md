@@ -1,4 +1,4 @@
-to run:
+to run Library MS:
 
 1. /library_service : run  - "bal run ."
 2. /library_service : run  - "bal run ."
