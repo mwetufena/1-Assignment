@@ -1,7 +1,7 @@
-# Library & Resource Management System
+Library & Resource Management System
 
 A RESTful backend + interactive CLI client for the Ministry of Higher Education
-(Training and Innovations) **distributed Library Management System** — built
+(Training and Innovations) "distributed Library Management System" — built
 in **Ballerina 2201.13.5 (Swan Lake)**.
 
 The system tracks books, electronic resources (laptops, thin clients), and
@@ -15,7 +15,7 @@ tracking.
 
 ---
 
-## 1. Project layout
+1. Project layout
 
 ```
 library-ms/
@@ -42,37 +42,31 @@ library-ms/
         └── main.bal                  # menu loop + flows
 ```
 
-## 2. Quick start (IDE)
+2. Quick start (IDE)
 
-### VS Code
+VS Code
 
-1. Install the **Ballerina** extension (`WSO2.ballerina`).
+1. Install the "Ballerina" extension (`WSO2.ballerina`).
 2. Open this folder (`File ▸ Open Folder… ▸ library-ms`).
-3. Press `Ctrl+Shift+B` → choose **Ballerina: Build all**.
-4. Press `F5` → choose **Run library_service**. (Use the **Run library_client**
+3. Press `Ctrl+Shift+B` → choose "Ballerina: Build all".
+4. Press `F5` → choose "Run library_service". (Use the "Run library_client"
    configuration in a second debug session to drive the UI.)
-   Or use the **Service + Client (parallel)** compound launch.
+   Or use the "Service + Client (parallel)" compound launch.
 
-### IntelliJ IDEA
 
-1. Install the **Ballerina** plugin.
-2. Open this folder as a project. Both modules appear under
-   `modules/library_service` and `modules/library_client`.
-3. Click the green **Run** gutter icon next to `main()` in either module,
-   or right-click a module folder → **Run 'bal run …'**.
 
-### Command line (one click)
+Command line (one click)
 
-```powershell
-# from the repo root
+powershell
+-- from the repo root
 powershell -ExecutionPolicy Bypass -File .\start.ps1
-```
+
 
 or double-click `start.cmd`. The script builds both modules, launches the
 service in a new console window on `http://localhost:9090`, waits for it to
 be ready, then opens the interactive client.
 
-### Browser dashboard
+Browser dashboard
 
 The standalone browser dashboard is [index.html](../index.html) in the
 repository root. Start the Ballerina service first, then open that file
@@ -81,9 +75,9 @@ directly in a browser. It connects to `http://localhost:9090/library`.
 For a local static server, run the following from the repository root after
 starting the service:
 
-```powershell
+powershell
 python -m http.server 8000
-```
+
 
 Then open `http://localhost:8000/index.html`. Stop the static server with
 `Ctrl+C`. The service must remain running separately because the HTML file is
@@ -91,7 +85,7 @@ only the browser interface; it does not start the Ballerina backend.
 
 ## 3. What the service exposes
 
-Base path: **`http://localhost:9090/library`**
+Base path: `http://localhost:9090/library`
 
 | Method | Path                                                  | Purpose |
 |--------|--------------------------------------------------------|---------|
@@ -118,7 +112,7 @@ Base path: **`http://localhost:9090/library`**
 | POST   | `/assets/{assetTag}/book`                              | Book a room / lab |
 | GET    | `/loans`                                               | List active loans |
 
-### Status codes
+Status codes
 
 | Outcome | Code |
 |---------|------|
@@ -128,7 +122,8 @@ Base path: **`http://localhost:9090/library`**
 | Asset / sub-resource not found | `404 Not Found` |
 | Conflict (duplicate tag, loan when not available, double-booking) | `409 Conflict` |
 
-## 4. Data model
+
+4. Data model
 
 ```text
 Asset
@@ -156,15 +151,16 @@ Asset
         ├── taskId
         ├── description
         └── completed   boolean
-```
+
 
 The store is a `map<Asset>` keyed by `assetTag` (per spec §5.3). Loan
 bookkeeping lives in a separate `map<LoanRecord>` and is wiped when the
 asset is checked in or deleted.
 
-## 5. Sample asset payload (matches the spec §4)
 
-```json
+5. Sample asset payload (matches the spec §4)
+
+json
 {
   "assetTag": "NUST-LIB-3DP-001",
   "name": "Pro-Series 3D Printer",
@@ -190,14 +186,14 @@ asset is checked in or deleted.
     }
   ]
 }
-```
 
-## 6. The client
+
+6. The client
 
 Once the service is up, run the client (`bal run` inside `modules/library_client`
 or via the VS Code launch config) and you'll get a coloured interactive menu:
 
-```text
+
 Main Menu
   1 — Loan / return an asset
   2 — Book a meeting room or lab
@@ -209,33 +205,43 @@ Main Menu
   8 — Manage components
   9 — Work orders & sub-tasks
   0 — Exit
-```
 
-The client talks to the service over plain HTTP/JSON — it has **no shared
-types** with the server, so they can evolve independently. The base URL
+
+The client talks to the service over plain HTTP/JSON — it has 'no shared
+types' with the server, so they can evolve independently. The base URL
 (`http://localhost:9090/library`) is at the top of `modules/library_client/api.bal`.
 
-## 7. Testing
+7. Testing
 
 `smoke.ps1` exercises every endpoint in the matrix above (CRUD + components +
 schedules + work orders + tasks + loan + checkin + book + overdue + filters).
 Run it in a second terminal after `start.ps1` (or while the service is up
 from any other run):
 
-```powershell
+powershell
 powershell -ExecutionPolicy Bypass -File .\smoke.ps1
-```
+
 
 You can also point any REST client at `http://localhost:9090/library` —
 `sample-requests.http` is preloaded with working examples for the
-VS Code "REST Client" extension and IntelliJ's HTTP Client.
+VS Code "REST Client" extension and HTTP Client.
 
-## 8. Notes
+8. Notes
 
-* **In-memory store** — data resets every time the service restarts. The
+* In-memory store — data resets every time the service restarts. The
   `init()` function in `modules/library_service/store.bal` seeds five
   representative assets (per the spec, including the NUST 3D printer).
-* **No external dependencies** — only `ballerina/http` and `ballerina/time`.
-* **Ballerina version pinned** in each module's `Ballerina.toml`
+* No external dependencies — only `ballerina/http` and `ballerina/time`.
+* Ballerina version pinned in each module's `Ballerina.toml`
   (`distribution = "2201.13.0"`).
-* **CORS is open** for easy browser testing.
+* CORS is open for easy browser testing.
+
+
+==========================================
+to run:
+
+1. /library_service : run  - "bal run ."
+2. /library_service : run  - "bal run ."
+3. /Library Management System : run - "python -m http.server 8000
+4. open http://local:8000/index.html
+5. open is open
