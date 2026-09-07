@@ -1,35 +1,32 @@
-# Dependencies
+# Node
 node_modules/
 
 # Next.js
 .next/
 out/
 
-# Production
-build/
-dist/
-
 # TypeScript
 *.tsbuildinfo
 
-# Environment variables
+# Ballerina generated files
+**/target/
+
+# Environment files
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Debug logs
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
 # Vercel
 .vercel/
-
-# Misc
-*.log
