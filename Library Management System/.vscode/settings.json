@@ -1,0 +1,10 @@
+{
+  "files.exclude": {
+    "**/target": true,
+    "**/.ballerina": true
+  },
+  "ballerina.sdk路径": "",
+  "ballerina.home": "",
+  "ballerina-vscode.trace.server": "verbose",
+  "ballerina.enableTelemetry": false
+}

@@ -1,0 +1,123 @@
+### ------------------------------------------------------------------------
+### Library & Resource Management — REST Client sample file.
+### Use the VS Code "REST Client" extension (humao.rest-client) or IntelliJ
+### HTTP Client to run individual requests with `Ctrl+Alt+R` / `Send Request`.
+### All endpoints sit under http://localhost:9090/library
+### ------------------------------------------------------------------------
+
+@base = http://localhost:9090/library
+
+### Health check
+GET {{base}}/health
+
+### List all assets
+GET {{base}}/assets
+
+### View the seed 3D printer (used in the spec)
+GET {{base}}/assets/NUST-LIB-3DP-001
+
+### Non-existent asset — should return 404
+GET {{base}}/assets/does-not-exist
+
+### All institutions
+GET {{base}}/institutions
+
+### Filter by institution (URL-encode spaces as %20)
+GET {{base}}/institutions/University%20of%20Namibia/assets
+
+### Filter by site
+GET {{base}}/sites/Main%20Campus%20-%20Library/assets
+
+### Overdue maintenance dashboard
+GET {{base}}/maintenance/overdue
+
+### All current loans
+GET {{base}}/loans
+
+### ------------------------------------------------------------------------
+### Mutations
+### ------------------------------------------------------------------------
+
+### Create a new asset
+POST {{base}}/assets
+Content-Type: application/json
+
+{
+  "assetTag": "DEMO-LAP-001",
+  "name": "Demo Loan Laptop",
+  "description": "Used by the demo client.",
+  "institution": "Demo University",
+  "site": "Main Campus - Demo Lab",
+  "dateAcquired": "2024-09-01",
+  "components": [],
+  "schedules": [],
+  "workOrders": []
+}
+
+### Duplicate create — should return 409
+POST {{base}}/assets
+Content-Type: application/json
+
+{
+  "assetTag": "DEMO-LAP-001",
+  "name": "x",
+  "description": "x",
+  "institution": "x",
+  "site": "x",
+  "dateAcquired": "2024-09-01"
+}
+
+### Update the asset
+PUT {{base}}/assets/DEMO-LAP-001
+Content-Type: application/json
+
+{ "status": "AVAILABLE", "description": "Updated description" }
+
+### Add a component
+POST {{base}}/assets/DEMO-LAP-001/components
+Content-Type: application/json
+
+{ "compId": "C501", "name": "Battery Pack", "description": "60Wh lithium" }
+
+### Add a maintenance schedule (future date)
+POST {{base}}/assets/DEMO-LAP-001/schedules
+Content-Type: application/json
+
+{ "scheduleId": "SCH-501", "type": "MAINTENANCE", "dueDate": "2027-01-15", "description": "Annual checkup" }
+
+### Open a work order
+POST {{base}}/assets/DEMO-LAP-001/workorders
+Content-Type: application/json
+
+{
+  "orderId": "WO-501",
+  "status": "OPEN",
+  "description": "Battery not holding charge",
+  "tasks": [
+    { "taskId": "T1", "description": "Run battery diagnostics", "completed": false }
+  ]
+}
+
+### Add a sub-task
+POST {{base}}/assets/DEMO-LAP-001/workorders/WO-501/tasks
+Content-Type: application/json
+
+{ "taskId": "T2", "description": "Order replacement battery", "completed": false }
+
+### Loan the asset
+POST {{base}}/assets/DEMO-LAP-001/loan
+Content-Type: application/json
+
+{ "borrower": "Jane Doe", "expectedReturnDate": "2026-12-01" }
+
+### Return it
+POST {{base}}/assets/DEMO-LAP-001/checkin
+
+### Book a room
+POST {{base}}/assets/DEMO-LAP-001/book
+Content-Type: application/json
+
+{ "bookedBy": "Study Group", "scheduledDate": "2026-09-10", "purpose": "Midterm prep" }
+
+### Delete the demo asset
+DELETE {{base}}/assets/DEMO-LAP-001

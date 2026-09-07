@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library & Resource Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            padding: 40px 0;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #764ba2;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .controls h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .assets-table {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 700;
+            color: #667eea;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-AVAILABLE {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-LOANED_OUT {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-OCCUPIED {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-UNDER_MAINTENANCE {
+            background: #e2d4f0;
+            color: #4a148c;
+        }
+        
+        .status-DISPOSED {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8em;
+            border-radius: 5px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: #667eea;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #888;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .overdue-alert {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .overdue-alert.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Library & Resource Management</h1>
+            <p>Ministry of Higher Education, Training and Innovations</p>
+        </header>
+        
+        <div id="overdueAlert" class="overdue-alert">
+            <h3>⚠️ Overdue Items Alert</h3>
+            <p>There are <span id="overdueCount">0</span> items requiring attention.</p>
+        </div>
+        
+        <div class="dashboard">
+            <div class="card">
+                <h3>Total Assets</h3>
+                <div class="stat-number" id="totalAssets">-</div>
+                <div class="stat-label">Across all institutions</div>
+            </div>
+            <div class="card">
+                <h3>Available</h3>
+                <div class="stat-number" id="availableAssets">-</div>
+                <div class="stat-label">Ready for use</div>
+            </div>
+            <div class="card">
+                <h3>Loaned/Booked</h3>
+                <div class="stat-number" id="loanedAssets">-</div>
+                <div class="stat-label">Currently in use</div>
+            </div>
+            <div class="card">
+                <h3>Under Maintenance</h3>
+                <div class="stat-number" id="maintenanceAssets">-</div>
+                <div class="stat-label">Being serviced</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <h3>🔍 Filter Assets</h3>
+            <div class="filter-group">
+                <label>Institution:</label>
+                <select id="institutionFilter">
+                    <option value="">All Institutions</option>
+                </select>
+                
+                <label>Site:</label>
+                <select id="siteFilter">
+                    <option value="">All Sites</option>
+                </select>
+                
+                <label>Status:</label>
+                <select id="statusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="AVAILABLE">Available</option>
+                    <option value="LOANED_OUT">Loaned Out</option>
+                    <option value="OCCUPIED">Occupied</option>
+                    <option value="UNDER_MAINTENANCE">Under Maintenance</option>
+                    <option value="DISPOSED">Disposed</option>
+                </select>
+                
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn btn-success" onclick="showAddModal()">+ Add Asset</button>
+                <button class="btn btn-warning" onclick="checkOverdue()">⚠️ Check Overdue</button>
+            </div>
+        </div>
+        
+        <div id="alertBox" class="alert"></div>
+        
+        <div class="assets-table">
+            <div id="loadingState" class="loading">
+                <div class="spinner"></div>
+                <p>Loading assets...</p>
+            </div>
+            <table id="assetsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Asset Tag</th>
+                        <th>Name</th>
+                        <th>Institution</th>
+                        <th>Site</th>
+                        <th>Status</th>
+                        <th>Date Acquired</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="assetsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Add Asset Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Asset</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="addAssetForm" onsubmit="submitAsset(event)">
+                <div class="form-group">
+                    <label>Asset Tag *</label>
+                    <input type="text" id="newAssetTag" required placeholder="e.g., NUST-LIB-3DP-001">
+                </div>
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="newName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="newDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Institution *</label>
+                    <input type="text" id="newInstitution" required>
+                </div>
+                <div class="form-group">
+                    <label>Site/Campus *</label>
+                    <input type="text" id="newSite" required>
+                </div>
+                <div class="form-group">
+                    <label>Date Acquired *</label>
+                    <input type="date" id="newDateAcquired" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Asset</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Loan Modal -->
+    <div id="loanModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Loan Asset</h2>
+                <button class="close-btn" onclick="closeLoanModal()">&times;</button>
+            </div>
+            <form id="loanForm" onsubmit="submitLoan(event)">
+                <input type="hidden" id="loanAssetTag">
+                <div class="form-group">
+                    <label>Borrower Name/ID *</label>
+                    <input type="text" id="loanBorrower" required>
+                </div>
+                <div class="form-group">
+                    <label>Return Date *</label>
+                    <input type="date" id="loanReturnDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Purpose</label>
+                    <textarea id="loanPurpose" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Confirm Loan</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:9090/library';
+        let allAssets = [];
+        let currentAssetTag = '';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAssets();
+            loadInstitutions();
+            document.getElementById('newDateAcquired').valueAsDate = new Date();
+        });
+        
+        // Load all assets
+        async function loadAssets() {
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_URL}/assets`);
+                allAssets = await response.json();
+                displayAssets(allAssets);
+                updateStats(allAssets);
+            } catch (error) {
+                showAlert('Error loading assets: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Display assets in table
+        function displayAssets(assets) {
+            const tbody = document.getElementById('assetsBody');
+            tbody.innerHTML = '';
+            
+            assets.forEach(asset => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(asset.assetTag)}</strong></td>
+                    <td>${escapeHtml(asset.name)}</td>
+                    <td>${escapeHtml(asset.institution)}</td>
+                    <td>${escapeHtml(asset.site)}</td>
+                    <td><span class="status-badge status-${asset.status}">${asset.status.replace('_', ' ')}</span></td>
+                    <td>${asset.dateAcquired}</td>
+                    <td>
+                        <div class="actions">
+                            ${asset.status === 'AVAILABLE' ? 
+                                `<button class="btn btn-primary btn-small" onclick="showLoanModal('${asset.assetTag}')">Loan</button>` :
+                                `<button class="btn btn-success btn-small" onclick="returnAsset('${asset.assetTag}')">Return</button>`
+                            }
+                            <button class="btn btn-warning btn-small" onclick="deleteAsset('${asset.assetTag}')">Delete</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('assetsTable').style.display = assets.length > 0 ? 'table' : 'none';
+        }
+        
+        // Update dashboard stats
+        function updateStats(assets) {
+            document.getElementById('totalAssets').textContent = assets.length;
+            document.getElementById('availableAssets').textContent = assets.filter(a => a.status === 'AVAILABLE').length;
+            document.getElementById('loanedAssets').textContent = assets.filter(a => a.status === 'LOANED_OUT' || a.status === 'OCCUPIED').length;
+            document.getElementById('maintenanceAssets').textContent = assets.filter(a => a.status === 'UNDER_MAINTENANCE').length;
+        }
+        
+        // Load institutions for filter
+        async function loadInstitutions() {
+            try {
+                const response = await fetch(`${API_URL}/institutions`);
+                const institutions = await response.json();
+                const select = document.getElementById('institutionFilter');
+                
+                institutions.forEach(inst => {
+                    const option = document.createElement('option');
+                    option.value = inst;
+                    option.textContent = inst;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading institutions:', error);
+            }
+        }
+        
+        // Apply filters
+        async function applyFilters() {
+            const institution = document.getElementById('institutionFilter').value;
+            const site = document.getElementById('siteFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            
+            showLoading(true);
+            
+            try {
+                if (institution) {
+                    const response = await fetch(`${API_URL}/institutions/${encodeURIComponent(institution)}/assets`);
+                    const filtered = await response.json();
+                    displayAssets(filtered);
+                } else if (site) {
+                    const response = await fetch(`${API_URL}/sites/${encodeURIComponent(site)}/assets`);
+                    const filtered = await response.json();
+                    displayAssets(filtered);
+                } else if (status) {
+                    if (allAssets.length === 0) await loadAssets();
+                    const filtered = allAssets.filter(asset => asset.status === status);
+                    displayAssets(filtered);
+                } else {
+                    await loadAssets();
+                }
+            } catch (error) {
+                showAlert('Error applying filters: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Check overdue items
+        async function checkOverdue() {
+            try {
+                const response = await fetch(`${API_URL}/maintenance/overdue`);
+                const overdue = await response.json();
+                const total = overdue.count;
+                
+                const alertBox = document.getElementById('overdueAlert');
+                document.getElementById('overdueCount').textContent = total;
+                
+                if (total > 0) {
+                    alertBox.classList.add('active');
+                    showAlert(`Found ${total} overdue items! Check console for details.`, 'error');
+                    console.log('Overdue details:', overdue);
+                } else {
+                    alertBox.classList.remove('active');
+                    showAlert('No overdue items found!', 'success');
+                }
+            } catch (error) {
+                showAlert('Error checking overdue: ' + error.message, 'error');
+            }
+        }
+        
+        // Show add modal
+        function showAddModal() {
+            document.getElementById('addModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('addModal').classList.remove('active');
+            document.getElementById('addAssetForm').reset();
+        }
+        
+        // Submit new asset
+        async function submitAsset(event) {
+            event.preventDefault();
+            
+            const asset = {
+                assetTag: document.getElementById('newAssetTag').value,
+                name: document.getElementById('newName').value,
+                description: document.getElementById('newDescription').value,
+                institution: document.getElementById('newInstitution').value,
+                site: document.getElementById('newSite').value,
+                status: 'AVAILABLE',
+                dateAcquired: document.getElementById('newDateAcquired').value,
+                components: [],
+                schedules: [],
+                workOrders: []
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/assets`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(asset)
+                });
+                
+                if (response.ok) {
+                    showAlert('Asset created successfully!', 'success');
+                    closeModal();
+                    loadAssets();
+                } else {
+                    const error = await response.json();
+                    showAlert('Error: ' + (error.message || 'Failed to create asset'), 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Show loan modal
+        function showLoanModal(assetTag) {
+            currentAssetTag = assetTag;
+            document.getElementById('loanAssetTag').value = assetTag;
+            document.getElementById('loanModal').classList.add('active');
+        }
+        
+        function closeLoanModal() {
+            document.getElementById('loanModal').classList.remove('active');
+            document.getElementById('loanForm').reset();
+        }
+        
+        // Submit loan
+        async function submitLoan(event) {
+            event.preventDefault();
+            
+            const loanRequest = {
+                borrower: document.getElementById('loanBorrower').value,
+                expectedReturnDate: document.getElementById('loanReturnDate').value
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/assets/${encodeURIComponent(currentAssetTag)}/loan`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loanRequest)
+                });
+                
+                if (response.ok) {
+                    showAlert('Asset loaned successfully!', 'success');
+                    closeLoanModal();
+                    loadAssets();
+                } else {
+                    const error = await response.json();
+                    showAlert('Error: ' + (error.message || 'Failed to loan asset'), 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Return asset
+        async function returnAsset(assetTag) {
+            try {
+                const response = await fetch(`${API_URL}/assets/${encodeURIComponent(assetTag)}/checkin`, {
+                    method: 'POST',
+                });
+                
+                if (response.ok) {
+                    showAlert('Asset returned successfully!', 'success');
+                    loadAssets();
+                } else {
+                    showAlert('Error returning asset', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Delete asset
+        async function deleteAsset(assetTag) {
+            if (!confirm('Are you sure you want to delete this asset?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/assets/${encodeURIComponent(assetTag)}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showAlert('Asset deleted successfully!', 'success');
+                    loadAssets();
+                } else {
+                    showAlert('Error deleting asset', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Utility functions
+        function showLoading(show) {
+            document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+            if (show) document.getElementById('assetsTable').style.display = 'none';
+        }
+        
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type}`;
+            alertBox.style.display = 'block';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 5000);
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>

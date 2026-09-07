@@ -1,0 +1,70 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Ballerina: Build service",
+      "type": "shell",
+      "command": "bal",
+      "args": ["build"],
+      "options": {
+        "cwd": "${workspaceFolder}/modules/library_service"
+      },
+      "problemMatcher": ["$ballerina"],
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "Ballerina: Build client",
+      "type": "shell",
+      "command": "bal",
+      "args": ["build"],
+      "options": {
+        "cwd": "${workspaceFolder}/modules/library_client"
+      },
+      "problemMatcher": ["$ballerina"],
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "Ballerina: Build all",
+      "dependsOn": ["Ballerina: Build service", "Ballerina: Build client"],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "Ballerina: Run service (background)",
+      "type": "shell",
+      "command": "java",
+      "args": ["-jar", "target/bin/library_service.jar"],
+      "options": {
+        "cwd": "${workspaceFolder}/modules/library_service"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "panel": "shared" },
+      "runOptions": { "runOn": "folderOpen" }
+    },
+    {
+      "label": "Ballerina: Run client (interactive)",
+      "type": "shell",
+      "command": "bal",
+      "args": ["run", "."],
+      "options": {
+        "cwd": "${workspaceFolder}/modules/library_client"
+      },
+      "problemMatcher": ["$ballerina"],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "Ballerina: Open Swagger-style diagram",
+      "type": "shell",
+      "command": "bal",
+      "args": ["graph", "."],
+      "options": {
+        "cwd": "${workspaceFolder}/modules/library_service"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
